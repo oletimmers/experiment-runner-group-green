@@ -116,6 +116,7 @@ class RunnerConfig:
         """
         stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {folder_id}")
         output.console_log(stdout.read().decode())
+        output.console_log(stderr.read().decode())
 
         if language == "cpp":
             #compile c++
