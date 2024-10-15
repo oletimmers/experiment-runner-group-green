@@ -14,7 +14,11 @@ from io import StringIO
 
 import paramiko
 import pandas as pd 
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("paramiko")
+logger.setLevel(logging.WARNING)  # Set to WARNING to ignore INFO messages
 
 class RunnerConfig:
     ROOT_DIR = Path(dirname(realpath(__file__)))
