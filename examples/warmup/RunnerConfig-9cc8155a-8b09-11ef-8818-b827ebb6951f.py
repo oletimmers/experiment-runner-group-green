@@ -98,8 +98,8 @@ class RunnerConfig:
     def before_run(self) -> None:
         """Perform any activity required before starting a run.
         No context is available here as the run is not yet active (BEFORE RUN)"""
-        # stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
-        # output.console_log(stdout.read().decode())
+        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
+        output.console_log(stdout.read().decode())
         # output.console_log(stdout.read().decode())
         output.console_log("Config.before_run() called!")
 
@@ -107,10 +107,6 @@ class RunnerConfig:
         """Perform any activity required for starting the run here.
         For example, starting the target system to measure.
         Activities after starting the run should also be performed here."""
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
-        output.console_log(stdout.read().decode())
-
-        
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -159,18 +155,6 @@ class RunnerConfig:
         # language = context.run_variation['language']
         # problem = context.run_variation['problem']
         # folder_id = f"{llm}_{language}_{problem}"
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
-        output.console_log(stdout.read().decode())
-
-        llm = context.run_variation['llm']
-        language = context.run_variation['language']
-        problem = context.run_variation['problem']
-        folder_id = f"{llm}_{language}_{problem}"
-        """
-        Here we first compile and then measure the lines of machine code
-        """
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {folder_id}")
-        output.console_log(stdout.read().decode())
 
         run_command = f"./code"
         energibridge_command = f'energibridge --output "energibridge.csv" --summary {run_command}'
@@ -206,19 +190,6 @@ class RunnerConfig:
                 csv_content = remote_file.read().decode('utf-8')
             sftp_client.close()
             return csv_content
-        
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
-        output.console_log(stdout.read().decode())
-
-        llm = context.run_variation['llm']
-        language = context.run_variation['language']
-        problem = context.run_variation['problem']
-        folder_id = f"{llm}_{language}_{problem}"
-        """
-        Here we first compile and then measure the lines of machine code
-        """
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {folder_id}")
-        output.console_log(stdout.read().decode())
 
         # Path to the CSV file on the remote server
         remote_csv_path = 'energibridge.csv'
