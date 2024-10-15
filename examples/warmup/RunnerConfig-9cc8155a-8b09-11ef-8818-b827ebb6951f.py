@@ -31,8 +31,8 @@ class RunnerConfig:
 
 
     # Change these LOCALLY
-    hostname:                   str             = "computername"
-    username:                   str             = "john"
+    hostname:                   str             = "192.168.178.207"
+    username:                   str             = "ubuntu-ole"
     password:                   str             = "john123pw"
 
     """Experiment operation type. Unless you manually want to initiate each run, use `OperationType.AUTO`."""
@@ -108,7 +108,8 @@ class RunnerConfig:
         """
         Here we first compile and then measure the lines of machine code
         """
-        self.ssh_client.exec_command(f"cd {folder_id}")
+        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {folder_id}")
+        output.console_log(stdout.read().decode())
 
         if language == "cpp":
             #compile c++
