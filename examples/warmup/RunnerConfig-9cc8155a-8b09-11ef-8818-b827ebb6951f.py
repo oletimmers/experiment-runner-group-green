@@ -10,6 +10,7 @@ from ProgressManager.Output.OutputProcedure import OutputProcedure as output
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from os.path import dirname, realpath
+from io import StringIO
 
 import paramiko
 import pandas as pd 
@@ -94,6 +95,7 @@ class RunnerConfig:
         """Perform any activity required before starting a run.
         No context is available here as the run is not yet active (BEFORE RUN)"""
         stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
+        output.console_log(stdout.read().decode())
         # output.console_log(stdout.read().decode())
         output.console_log("Config.before_run() called!")
 
@@ -135,7 +137,7 @@ class RunnerConfig:
         stdin, stdout, stderr = self.ssh_client.exec_command(objdump_command)
         instruction_count = int(stdout.read().decode().strip())
         write_command = f"echo {instruction_count} > instruction_count.txt"
-        self.ssh_client.exec_command(write_command)
+        stdin, stdout, stderr = self.ssh_client.exec_command(write_command)
         output.console_log("Instruction count written to instruction_count.txt")
         output.console_log(f"Instruction count: {instruction_count}")
 
@@ -177,7 +179,21 @@ class RunnerConfig:
         """Parse and process any measurement data here.
         You can also store the raw measurement data under `context.run_dir`
         Returns a dictionary with keys `self.run_table_model.data_columns` and their values populated"""
-        df = pd.read_csv(context.run_dir / f"energibridge.csv")
+        def read_csv_from_ssh(ssh_client, remote_path):
+            sftp_client = ssh_client.open_sftp()
+            with sftp_client.file(remote_path, 'r') as remote_file:
+                csv_content = remote_file.read().decode('utf-8')
+            sftp_client.close()
+            return csv_content
+
+        # Path to the CSV file on the remote server
+        remote_csv_path = 'energibridge.csv'
+
+        # Read the CSV content from the remote server
+        csv_content = read_csv_from_ssh(self.ssh_client, remote_csv_path)
+
+        # Read the CSV content into a pandas DataFrame
+        df = pd.read_csv(StringIO(csv_content))
     
         # Calculate energy usage
         energy_usage = round(df['SYSTEM_POWER (Watts)'].sum() * df['Delta'].sum(), 3)
