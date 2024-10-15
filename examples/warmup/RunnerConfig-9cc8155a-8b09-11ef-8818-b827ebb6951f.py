@@ -18,14 +18,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("paramiko")
-logger.setLevel(logging.WARNING)  # Set to WARNING to ignore INFO messages
-
-class CustomTransport(paramiko.Transport):
-    def _log(self, level, msg, *args):
-        if "Success for unrequested channel" in msg:
-            return  # Ignore these messages
-        super()._log(level, msg, *args)
-
+logger.setLevel(logging.INFO)  # Set to WARNING to ignore INFO messages
 
 class RunnerConfig:
     ROOT_DIR = Path(dirname(realpath(__file__)))
@@ -99,9 +92,7 @@ class RunnerConfig:
         Invoked only once during the lifetime of the program."""
         self.ssh_client = paramiko.SSHClient()
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        transport = CustomTransport((self.hostname, 22))
-        transport.connect(username=self.username, password=self.password)
-        self.ssh_client._transport = transport
+        self.ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
         output.console_log("SSH connection established")
 
     def before_run(self) -> None:
