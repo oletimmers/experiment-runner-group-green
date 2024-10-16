@@ -162,8 +162,11 @@ class RunnerConfig:
         energibridge_command = f'{cd_command}&& sudo energibridge --output "energibridge.csv" --summary {run_command}'
 
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
-        output.console_log(stdout.read().decode())
         error_output = stderr.read().decode()
+        if error_output:
+            output.console_log(error_output)
+        else:
+            output.console_log(f"Code run: Energibridge output written to energibridge.csv\n{stdout.read().decode()}")
         self.close_ssh_client(ssh_client)
 
     def interact(self, context: RunnerContext) -> None:
