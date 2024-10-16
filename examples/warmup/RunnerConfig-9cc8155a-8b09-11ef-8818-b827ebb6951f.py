@@ -266,7 +266,7 @@ class RunnerConfig:
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
         output.console_log("SSH connection established")
-        stdin, stdout, stderr = self.ssh_client.exec_command(f"cd {self.source_path}")
+        stdin, stdout, stderr = ssh_client.exec_command(f"cd {self.source_path}")
         output.console_log(stdout.read().decode())
         output.console_log("At source path")
         return ssh_client
