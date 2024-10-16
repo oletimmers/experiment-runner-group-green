@@ -122,6 +122,8 @@ class RunnerConfig:
         else:
             compile_command = f"&& ghc -o code code.hs"
 
+        compile_command += f" && chmod +x code"
+
         stdin, stdout, stderr = ssh_client.exec_command(f"{compile_command}")
         output.console_log(stdout.read().decode())
         error_output = stderr.read().decode()
@@ -251,7 +253,7 @@ class RunnerConfig:
         output.console_log("SSH connection established")
         return ssh_client
     
-    def close_ssh_client(ssh_client):
+    def close_ssh_client(self, ssh_client):
         if ssh_client:
             ssh_client.close()
             output.console_log("SSH connection closed")
