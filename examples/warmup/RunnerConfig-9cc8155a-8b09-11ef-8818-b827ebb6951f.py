@@ -157,6 +157,13 @@ class RunnerConfig:
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
+        stdin, stdout, stderr = ssh_client.exec_command(f"ls")
+        whats_inside = stdout.read().decode().strip()
+        
+        # Print the current working directory on the remote server
+        output.console_log(f"What's inside this folder: \n{whats_inside}")
+
+
         stdin, stdout, stderr = ssh_client.exec_command(f"cd {folder_id}")
         output.console_log(stdout.read().decode())
         output.console_log(stderr.read().decode())
