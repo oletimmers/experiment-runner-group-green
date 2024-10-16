@@ -164,7 +164,7 @@ class RunnerConfig:
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
         stdin.write(self.password + '\n')
         stdin.flush()
-        
+
         error_output = stderr.read().decode()
         if error_output:
             output.console_log(error_output)
@@ -216,20 +216,24 @@ class RunnerConfig:
         # Read the CSV content into a pandas DataFrame
         df = pd.read_csv(StringIO(csv_content))
     
-        # Calculate energy usage
-        energy_usage = round(df['SYSTEM_POWER (Watts)'].sum() * df['Delta'].sum(), 3)
-        
-        # Calculate average CPU usage
+        num_rows = len(df)
+
+        # Calculate energy usage (sum of relevant energy columns divided by number of rows)
+        energy_usage = round((df['DRAM_ENERGY (J)'].sum() + df['PACKAGE_ENERGY (J)'].sum()) / num_rows, 3)
+
+        # Calculate average CPU usage (mean of all CPU_USAGE_* columns)
         cpu_usage_columns = [col for col in df.columns if col.startswith('CPU_USAGE_')]
         cpu_usage = round(df[cpu_usage_columns].mean().mean(), 3)
-        
-        # Calculate average memory usage
+
+        # Calculate average memory usage (average over the rows)
         memory_usage = round(df['USED_MEMORY'].mean(), 3)
+
+        # Calculate execution time (difference between first and last Time value)
+        execution_time = df['Time'].max() - df['Time'].min()
 
         machine_code_size = read_file_from_ssh(ssh_client, instruction_count_file)
         
         # Calculate execution time
-        execution_time = round(df['Delta'].sum(), 3)
         output.console_log("Config.populate_run_data() called!")
         run_data = {
             'energy_usage': energy_usage,
