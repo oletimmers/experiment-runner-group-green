@@ -64,6 +64,7 @@ class RunnerConfig:
             (RunnerEvents.AFTER_EXPERIMENT , self.after_experiment )
         ])
         self.run_table_model = None  # Initialized later
+        self.ssh_client = self.create_new_ssh_client() # open connection once
 
         output.console_log("Custom config loaded")
 
@@ -89,7 +90,6 @@ class RunnerConfig:
     def before_experiment(self) -> None:
         """Perform any activity required before starting the experiment here
         Invoked only once during the lifetime of the program."""
-        
         # self.ssh_client = paramiko.SSHClient()
         # self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # self.ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
@@ -103,53 +103,37 @@ class RunnerConfig:
         output.console_log("Config.before_run() called!")
 
     def start_run(self, context: RunnerContext) -> None:
-        context.ssh_client = self.create_new_ssh_client()
-        ssh_client = context.ssh_client
+        ssh_client = self.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
-        stdin, stdout, stderr = ssh_client.exec_command(f"ls")
-        whats_inside = stdout.read().decode().strip()
-        output.console_log(f"What is inside folder: \n {whats_inside}")
-
         # Cd into the run folder
-        stdin, stdout, stderr = ssh_client.exec_command(f"cd {folder_id}")
-        output.console_log(stdout.read().decode())
-        output.console_log(stderr.read().decode())
-        """Perform any activity required for starting the run here.
-        For example, starting the target system to measure.
-        Activities after starting the run should also be performed here."""
-        
+        cd_command = f"cd {self.source_path}/{folder_id} " 
+        compile_command = f"{cd_command}"
+
         """
         Here we first compile and then measure the lines of machine code
         """
-        
 
         if language == "cpp":
             #compile c++
-            compile_command = f"g++ code.cpp -o code"
-            stdin, stdout, stderr = ssh_client.exec_command(compile_command)
-            output.console_log(stdout.read().decode())
-            error_output = stderr.read().decode()
-            if error_output:
-                output.console_log(error_output)
-            else:
-                output.console_log("C++ file compiled successfully")
+            compile_command += f"&& g++ code.cpp -o code"
         else:
-            compile_command = f"ghc -o code code.hs"
-            stdin, stdout, stderr = ssh_client.exec_command(compile_command)
-            output.console_log(stdout.read().decode())
-            error_output = stderr.read().decode()
-            if error_output:
-                output.console_log(error_output)
-            else:
-                output.console_log("Haskell file compiled successfully")
+            compile_command = f"&& ghc -o code code.hs"
 
-        objdump_command = f"objdump -d code | wc -l"
+        stdin, stdout, stderr = ssh_client.exec_command(f"{compile_command}")
+        output.console_log(stdout.read().decode())
+        error_output = stderr.read().decode()
+        if error_output:
+            output.console_log(error_output)
+        else:
+            output.console_log("Code compiled successfully")
+
+        objdump_command = f"{cd_command}&& objdump -d code | wc -l"
         stdin, stdout, stderr = ssh_client.exec_command(objdump_command)
         instruction_count = int(stdout.read().decode().strip())
-        write_command = f"echo {instruction_count} > instruction_count.txt"
+        write_command = f"{cd_command}&& echo {instruction_count} > instruction_count.txt"
         stdin, stdout, stderr = ssh_client.exec_command(write_command)
         output.console_log("Instruction count written to instruction_count.txt")
         output.console_log(f"Instruction count: {instruction_count}")
@@ -157,21 +141,13 @@ class RunnerConfig:
         output.console_log("Compiled and ready to run!")
 
     def start_measurement(self, context: RunnerContext) -> None:
-        ssh_client = context.ssh_client
+        ssh_client = self.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
-        stdin, stdout, stderr = ssh_client.exec_command(f"ls")
-        whats_inside = stdout.read().decode().strip()
-        
-        # Print the current working directory on the remote server
-        output.console_log(f"What's inside this folder: {whats_inside}")
-
-
-        stdin, stdout, stderr = ssh_client.exec_command(f"cd {folder_id}")
-        output.console_log(stdout.read().decode())
-        output.console_log(stderr.read().decode())
+        # Cd into the run folder
+        cd_command = f"cd {self.source_path}/{folder_id} " 
         """Perform any activity required for starting measurements."""
         """We are already in the right directory I believe"""
         # llm = context.run_variation['llm']
@@ -180,7 +156,7 @@ class RunnerConfig:
         # folder_id = f"{llm}_{language}_{problem}"
 
         run_command = f"./code"
-        energibridge_command = f'energibridge --output "energibridge.csv" --summary {run_command}'
+        energibridge_command = f'{cd_command}&& energibridge --output "energibridge.csv" --summary {run_command}'
 
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
         output.console_log(stdout.read().decode())
@@ -204,18 +180,17 @@ class RunnerConfig:
         output.console_log("Config.stop_run() called!")
 
     def populate_run_data(self, context: RunnerContext) -> Optional[Dict[str, SupportsStr]]:
-        ssh_client = context.ssh_client
+        ssh_client = self.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
-        stdin, stdout, stderr = ssh_client.exec_command(f"cd {folder_id}")
-        output.console_log(stdout.read().decode())
-        output.console_log(stderr.read().decode())
+        # Cd into the run folder
+        cd_command = f"cd {self.source_path}/{folder_id} " 
         """Parse and process any measurement data here.
         You can also store the raw measurement data under `context.run_dir`
         Returns a dictionary with keys `self.run_table_model.data_columns` and their values populated"""
-        def read_csv_from_ssh(ssh_client, remote_path):
+        def read_file_from_ssh(ssh_client, remote_path):
             sftp_client = ssh_client.open_sftp()
             with sftp_client.file(remote_path, 'r') as remote_file:
                 csv_content = remote_file.read().decode('utf-8')
@@ -223,10 +198,11 @@ class RunnerConfig:
             return csv_content
 
         # Path to the CSV file on the remote server
-        remote_csv_path = 'energibridge.csv'
+        remote_csv_path = f"{self.source_path}/{folder_id}/energibridge.csv"
+        instruction_count_file = f"{self.source_path}/{folder_id}/instruction_count.txt"
 
         # Read the CSV content from the remote server
-        csv_content = read_csv_from_ssh(ssh_client, remote_csv_path)
+        csv_content = read_file_from_ssh(ssh_client, remote_csv_path)
 
         # Read the CSV content into a pandas DataFrame
         df = pd.read_csv(StringIO(csv_content))
@@ -241,12 +217,7 @@ class RunnerConfig:
         # Calculate average memory usage
         memory_usage = round(df['USED_MEMORY'].mean(), 3)
 
-        instruction_count_file = context.run_dir / "instruction_count.txt"
-        if instruction_count_file.exists():
-            with open(instruction_count_file, 'r') as file:
-                machine_code_size = int(file.read().strip())
-        else:
-            machine_code_size = 0
+        machine_code_size = read_file_from_ssh(ssh_client, instruction_count_file)
         
         # Calculate execution time
         execution_time = round(df['Delta'].sum(), 3)
@@ -276,17 +247,11 @@ class RunnerConfig:
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
         output.console_log("SSH connection established")
-        stdin, stdout, stderr = ssh_client.exec_command(f"cd {self.source_path} && pwd")
-        current_path = stdout.read().decode().strip()
-        
-        # Print the current working directory on the remote server
-        output.console_log(f"Current Path on Remote Server: {current_path}")
-        
         return ssh_client
     
-    def close_ssh_client(self, ssh_client):
-        if ssh_client:
-            ssh_client.close()
+    def close_ssh_client(self):
+        if self.ssh_client:
+            self.ssh_client.close()
             output.console_log("SSH connection closed")
     # ================================ DO NOT ALTER BELOW THIS LINE ================================
     experiment_path:            Path             = None
