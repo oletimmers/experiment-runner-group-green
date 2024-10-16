@@ -64,7 +64,7 @@ class RunnerConfig:
             (RunnerEvents.AFTER_EXPERIMENT , self.after_experiment )
         ])
         self.run_table_model = None  # Initialized later
-        self.ssh_client = self.create_new_ssh_client() # open connection once
+        
 
         output.console_log("Custom config loaded")
 
@@ -103,7 +103,7 @@ class RunnerConfig:
         output.console_log("Config.before_run() called!")
 
     def start_run(self, context: RunnerContext) -> None:
-        ssh_client = self.ssh_client
+        ssh_client = self.create_new_ssh_client() # open connection once
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -139,9 +139,10 @@ class RunnerConfig:
         output.console_log(f"Instruction count: {instruction_count}")
 
         output.console_log("Compiled and ready to run!")
+        self.close_ssh_client(ssh_client)
 
     def start_measurement(self, context: RunnerContext) -> None:
-        ssh_client = self.ssh_client
+        ssh_client = self.create_new_ssh_client() # open connection once
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -161,7 +162,7 @@ class RunnerConfig:
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
         output.console_log(stdout.read().decode())
         error_output = stderr.read().decode()
-        output.console_log("Config.start_measurement() called!")
+        self.close_ssh_client(ssh_client)
 
     def interact(self, context: RunnerContext) -> None:
         """Perform any interaction with the running target system here, or block here until the target finishes."""
@@ -180,7 +181,7 @@ class RunnerConfig:
         output.console_log("Config.stop_run() called!")
 
     def populate_run_data(self, context: RunnerContext) -> Optional[Dict[str, SupportsStr]]:
-        ssh_client = self.ssh_client
+        ssh_client = self.create_new_ssh_client() # open connection once
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -229,6 +230,7 @@ class RunnerConfig:
             'execution_time': execution_time,
             'machine_code_size': machine_code_size
         }
+        self.close_ssh_client(ssh_client)
         return run_data
 
     def after_experiment(self) -> None:
@@ -249,9 +251,9 @@ class RunnerConfig:
         output.console_log("SSH connection established")
         return ssh_client
     
-    def close_ssh_client(self):
-        if self.ssh_client:
-            self.ssh_client.close()
+    def close_ssh_client(ssh_client):
+        if ssh_client:
+            ssh_client.close()
             output.console_log("SSH connection closed")
     # ================================ DO NOT ALTER BELOW THIS LINE ================================
     experiment_path:            Path             = None
