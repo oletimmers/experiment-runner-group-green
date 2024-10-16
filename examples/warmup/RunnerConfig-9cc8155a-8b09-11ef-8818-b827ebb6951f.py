@@ -76,12 +76,11 @@ class RunnerConfig:
         problem_type= FactorModel("problem", ["PS","SR"])
         self.run_table_model = RunTableModel(
             factors=[llm_factor, language_factor, problem_type],
-            exclude_variations=[ # To have now only ONE treatment
-                {llm_factor: ['Gemini', 'Claude']}, 
-                {language_factor: ['haskell']}, 
-                {problem_type: ['SR']}
-                # {language_factor: ['example_treatment2'], factor2: [True]},  # all runs having the combination ("example_treatment2", True) will be excluded
-            ],
+            # exclude_variations=[ # To have now only ONE treatment
+            #     {llm_factor: ['Gemini', 'Claude']}, 
+            #     {problem_type: ['SR']}
+            #     # {language_factor: ['example_treatment2'], factor2: [True]},  # all runs having the combination ("example_treatment2", True) will be excluded
+            # ],
             repetitions = 3,
             data_columns=['energy_usage', 'cpu_usage', 'memory_usage', 'execution_time', 'machine_code_size']
         )
@@ -122,7 +121,7 @@ class RunnerConfig:
             #compile c++
             compile_command += f"&& g++ code.cpp -o code"
         else:
-            compile_command = f"&& ghc -o code code.hs"
+            compile_command += f"&& ghc -o code code.hs"
 
         compile_command += f" && chmod +x code"
 
