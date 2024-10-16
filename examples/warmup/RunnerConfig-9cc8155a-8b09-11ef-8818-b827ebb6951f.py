@@ -64,7 +64,6 @@ class RunnerConfig:
             (RunnerEvents.AFTER_EXPERIMENT , self.after_experiment )
         ])
         self.run_table_model = None  # Initialized later
-        self.ssh_client = self.create_new_ssh_client()
 
         output.console_log("Custom config loaded")
 
@@ -90,6 +89,7 @@ class RunnerConfig:
     def before_experiment(self) -> None:
         """Perform any activity required before starting the experiment here
         Invoked only once during the lifetime of the program."""
+        
         # self.ssh_client = paramiko.SSHClient()
         # self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # self.ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
@@ -103,9 +103,10 @@ class RunnerConfig:
         output.console_log("Config.before_run() called!")
 
     def start_run(self, context: RunnerContext) -> None:
-        self.close_ssh_client()
-        self.ssh_client = self.create_new_ssh_client()
-        ssh_client = self.ssh_client
+        if not hasattr(context, 'ssh_client'):
+            self.close_ssh_client(context.ssh_client)
+            context.ssh_client = self.create_new_ssh_client()
+        ssh_client = context.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -158,7 +159,7 @@ class RunnerConfig:
         output.console_log("Compiled and ready to run!")
 
     def start_measurement(self, context: RunnerContext) -> None:
-        ssh_client = self.ssh_client
+        ssh_client = context.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -205,7 +206,7 @@ class RunnerConfig:
         output.console_log("Config.stop_run() called!")
 
     def populate_run_data(self, context: RunnerContext) -> Optional[Dict[str, SupportsStr]]:
-        ssh_client = self.ssh_client
+        ssh_client = context.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -285,9 +286,9 @@ class RunnerConfig:
         
         return ssh_client
     
-    def close_ssh_client(self):
-        if self.ssh_client:
-            self.ssh_client.close()
+    def close_ssh_client(self, ssh_client):
+        if ssh_client:
+            ssh_client.close()
             output.console_log("SSH connection closed")
     # ================================ DO NOT ALTER BELOW THIS LINE ================================
     experiment_path:            Path             = None
