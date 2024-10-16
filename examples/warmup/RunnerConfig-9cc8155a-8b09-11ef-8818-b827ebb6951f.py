@@ -78,8 +78,8 @@ class RunnerConfig:
             factors=[llm_factor, language_factor, problem_type],
             exclude_variations=[ # To have now only ONE treatment
                 {llm_factor: ['Gemini', 'Claude']}, 
-                {llm_factor: ['haskell']}, 
-                {llm_factor: ['SR']}
+                {language_factor: ['haskell']}, 
+                {problem_type: ['SR']}
                 # {language_factor: ['example_treatment2'], factor2: [True]},  # all runs having the combination ("example_treatment2", True) will be excluded
             ],
             repetitions = 3,
@@ -108,6 +108,8 @@ class RunnerConfig:
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
+        output.console_log(f"Running {folder_id}")
+
         # Cd into the run folder
         cd_command = f"cd {self.source_path}/{folder_id} " 
         compile_command = f"{cd_command}"
@@ -149,6 +151,7 @@ class RunnerConfig:
         language = context.run_variation['language']
         problem = context.run_variation['problem']
         folder_id = f"{llm}_{language}_{problem}"
+
         # Cd into the run folder
         cd_command = f"cd {self.source_path}/{folder_id} " 
         """Perform any activity required for starting measurements."""
