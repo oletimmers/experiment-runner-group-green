@@ -32,7 +32,7 @@ class RunnerConfig:
     Output path defaults to the config file's path, inside the folder 'experiments'"""
     results_output_path:        Path            = ROOT_DIR / 'experiments'
 
-    source_path:                str             = "~/Greenlab/main-repo/experiment-runner-group-green/experiments-laptop"
+    source_path:                str             = "/home/ubuntu-ole/green-lab/main-repo/experiment-runner-group-green/experiments-laptop"
 
 
     # Change these LOCALLY
@@ -266,9 +266,12 @@ class RunnerConfig:
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
         output.console_log("SSH connection established")
-        stdin, stdout, stderr = ssh_client.exec_command(f"cd {self.source_path}")
-        output.console_log(stdout.read().decode())
-        output.console_log("At source path")
+        stdin, stdout, stderr = ssh_client.exec_command(f"cd {self.source_path} && pwd")
+        current_path = stdout.read().decode().strip()
+        
+        # Print the current working directory on the remote server
+        output.console_log(f"Current Path on Remote Server: {current_path}")
+        
         return ssh_client
     # ================================ DO NOT ALTER BELOW THIS LINE ================================
     experiment_path:            Path             = None
