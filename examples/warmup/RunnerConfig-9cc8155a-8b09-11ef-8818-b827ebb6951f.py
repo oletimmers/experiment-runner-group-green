@@ -159,7 +159,7 @@ class RunnerConfig:
         # folder_id = f"{llm}_{language}_{problem}"
 
         run_command = f"./code"
-        energibridge_command = f'{cd_command}&& energibridge --output "energibridge.csv" --summary {run_command}'
+        energibridge_command = f'{cd_command}&& sudo energibridge --output "energibridge.csv" --summary {run_command}'
 
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
         output.console_log(stdout.read().decode())
