@@ -103,9 +103,7 @@ class RunnerConfig:
         output.console_log("Config.before_run() called!")
 
     def start_run(self, context: RunnerContext) -> None:
-        if not hasattr(context, 'ssh_client'):
-            self.close_ssh_client(context.ssh_client)
-            context.ssh_client = self.create_new_ssh_client()
+        context.ssh_client = self.create_new_ssh_client()
         ssh_client = context.ssh_client
         llm = context.run_variation['llm']
         language = context.run_variation['language']
