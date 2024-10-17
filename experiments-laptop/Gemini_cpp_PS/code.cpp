@@ -2,21 +2,25 @@
 #include <unordered_map>
 #include <iostream>
 
+using namespace std;
+
 class Solution {
 public:
-    std::vector<int> twoSum(std::vector<int>& nums, int target) {
-        std::unordered_map<int, int> num_map;  // To store the number and its index
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> numMap; // Value, Index
+
         for (int i = 0; i < nums.size(); ++i) {
             int complement = target - nums[i];
-            if (num_map.find(complement) != num_map.end()) {
-                // If complement is found in the map, return the pair of indices
-                return {num_map[complement], i};
+
+            // If complement found, return current index and its index
+            if (numMap.count(complement)) {
+                return {numMap[complement], i};
             }
-            // Otherwise, add the current number and its index to the map
-            num_map[nums[i]] = i;
+            // Otherwise, store the current value and its index
+            numMap[nums[i]] = i; 
         }
-        // If no solution is found (although the problem guarantees one solution exists)
-        return {};
+
+        return {}; // No solution found 
     }
 };
 
