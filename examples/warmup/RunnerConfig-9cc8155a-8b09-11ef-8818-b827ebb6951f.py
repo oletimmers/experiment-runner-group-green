@@ -74,8 +74,9 @@ class RunnerConfig:
         llm_factor = FactorModel("llm", ["ChatGPT","Gemini","Claude"])
         language_factor = FactorModel("language", ["cpp","haskell"])
         problem_type= FactorModel("problem", ["PS","SR"])
+        prompt_factor = FactorModel("prompt", ["OG", "EE"])
         self.run_table_model = RunTableModel(
-            factors=[llm_factor, language_factor, problem_type],
+            factors=[llm_factor, language_factor, problem_type, prompt_factor],
             # exclude_variations=[ # To have now only ONE treatment
             #     {llm_factor: ['Gemini', 'Claude']}, 
             #     {problem_type: ['SR']}
@@ -106,7 +107,8 @@ class RunnerConfig:
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
-        folder_id = f"{llm}_{language}_{problem}"
+        prompt = context.run_variation['prompt']
+        folder_id = f"{llm}_{language}_{problem}_{prompt}"
         output.console_log(f"Running {folder_id}")
 
         # Cd into the run folder
@@ -149,7 +151,8 @@ class RunnerConfig:
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
-        folder_id = f"{llm}_{language}_{problem}"
+        prompt = context.run_variation['prompt']
+        folder_id = f"{llm}_{language}_{problem}_{prompt}"
 
         # Cd into the run folder
         cd_command = f"cd {self.source_path}/{folder_id} " 
@@ -195,7 +198,8 @@ class RunnerConfig:
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
-        folder_id = f"{llm}_{language}_{problem}"
+        prompt = context.run_variation['prompt']
+        folder_id = f"{llm}_{language}_{problem}_{prompt}"
         # Cd into the run folder
         cd_command = f"cd {self.source_path}/{folder_id} " 
         """Parse and process any measurement data here.
