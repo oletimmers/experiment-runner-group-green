@@ -4,16 +4,15 @@ This is the fork of the Experiment-Runner repository of our team **Green :/**
 
 Experiment Runner is a generic framework to automatically execute measurement-based experiments on any platform. The experiments are user-defined, can be completely customized, and expressed in python code!
 
-## For our own group when performing the experiments:
-**On the laptop where the experiment itself are run:**
-1. Clone this repo and install Energibridge, look on Canvas if needed.
-2. Add the group msr if not existant: `sudo groupadd msr`.
-3. Do this after *each* startup, set permissions: ```sudo chgrp -R msr /dev/cpu/*/msr;
+## Concerning this fork:
+1. Clone this repo on both devices and install experiment-runner on the pi and Energibridge on the target laptop, look on Canvas if needed.
+2. On the laptop: Add the group msr if not existant: `sudo groupadd msr`.
+3. Still on the laptop: Do this after *each* startup, set permissions: ```sudo chgrp -R msr /dev/cpu/*/msr;
 sudo chmod g+r /dev/cpu/*/msr;```
+4. Make sure, besides experiment-runner, that `sudo energibridge`-commands work from ssh from the pi towards the target-laptop.
+5. Make sure the paths inside the Runner-Config are right and that the `experiments-laptop`-folder is set up the right way, on the laptop.
 
-
-
-
+# From main repo:
 *(Experiment Runner is a generalization of our previous successful tool, [Robot Runner](https://github.com/S2-group/robot-runner), for which you can read more in our [ICSE 2021 tool demo paper](https://github.com/S2-group/robot-runner/tree/master/documentation/ICSE_2021.pdf).)*
 
 ## Features
