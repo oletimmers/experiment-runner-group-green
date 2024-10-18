@@ -15,3 +15,11 @@ Possible values:
 ```
 
 Inside you put a `code.cpp` or `code.hs` file according to the programming language.
+
+
+Instructions to run the String manipulation code :
+
+The command line input is in this format :  <filename> <target_string> <replacement_string>
+eg : example.txt model network
+
+NOTE : The example.txt file should be in the same directory of the String code so that the code can access it.
