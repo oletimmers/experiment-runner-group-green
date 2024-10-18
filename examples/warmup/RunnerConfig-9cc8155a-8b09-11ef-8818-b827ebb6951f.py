@@ -223,10 +223,10 @@ class RunnerConfig:
         num_rows = len(df)
 
         # Calculate energy usage (sum of relevant energy columns divided by number of rows)
-        energy_usage_dram = round((df['DRAM_ENERGY (J)'].sum() / num_rows, 3))
-        energy_usage_package = round((df['PACKAGE_ENERGY (J)'].sum() / num_rows, 3))
-        energy_usage_pp0 = round((df['PP0_ENERGY (J)'].sum() / num_rows, 3))
-        energy_usage_pp1 = round((df['PP1_ENERGY (J)'].sum() / num_rows, 3))
+        energy_usage_dram = round(df['DRAM_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_package = round(df['PACKAGE_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_pp0 = round(df['PP0_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_pp1 = round(df['PP1_ENERGY (J)'].sum() / num_rows, 3)
                                  
         # Cpu usage                                 
         cpu_usage_0 = round(df['CPU_USAGE_0'].sum() / num_rows, 3)
