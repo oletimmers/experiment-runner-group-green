@@ -32,6 +32,7 @@ class RunnerConfig:
     Output path defaults to the config file's path, inside the folder 'experiments'"""
     results_output_path:        Path            = ROOT_DIR / 'experiments'
 
+    """This has to be the direct path ON the laptop, since from ssh it will get navigated to directly."""
     source_path:                str             = "/home/ubuntu-ole/green-lab/main-repo/experiment-runner-group-green/experiments-laptop"
 
 
@@ -77,11 +78,6 @@ class RunnerConfig:
         prompt_factor = FactorModel("prompt", ["OG", "EE"])
         self.run_table_model = RunTableModel(
             factors=[llm_factor, language_factor, problem_type, prompt_factor],
-            # exclude_variations=[ # To have now only ONE treatment
-            #     {llm_factor: ['Gemini', 'Claude']}, 
-            #     {problem_type: ['SR']}
-            #     # {language_factor: ['example_treatment2'], factor2: [True]},  # all runs having the combination ("example_treatment2", True) will be excluded
-            # ],
             repetitions = 3,
             data_columns=['energy_usage', 'cpu_usage', 'memory_usage', 'execution_time', 'machine_code_size']
         )
@@ -90,17 +86,12 @@ class RunnerConfig:
     def before_experiment(self) -> None:
         """Perform any activity required before starting the experiment here
         Invoked only once during the lifetime of the program."""
-        # self.ssh_client = paramiko.SSHClient()
-        # self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        # self.ssh_client.connect(hostname=self.hostname, username=self.username, password=self.password)
-        # output.console_log("SSH connection established")
+        pass
 
     def before_run(self) -> None:
         """Perform any activity required before starting a run.
         No context is available here as the run is not yet active (BEFORE RUN)"""
-        
-        # output.console_log(stdout.read().decode())
-        output.console_log("Config.before_run() called!")
+        pass
 
     def start_run(self, context: RunnerContext) -> None:
         ssh_client = self.create_new_ssh_client() # open connection once
@@ -118,7 +109,6 @@ class RunnerConfig:
         """
         Here we first compile and then measure the lines of machine code
         """
-
         if language == "cpp":
             #compile c++
             compile_command += f"&& g++ code.cpp -o code"
@@ -153,15 +143,10 @@ class RunnerConfig:
         problem = context.run_variation['problem']
         prompt = context.run_variation['prompt']
         folder_id = f"{llm}_{language}_{problem}_{prompt}"
-
         # Cd into the run folder
-        cd_command = f"cd {self.source_path}/{folder_id} " 
+        cd_command = f"cd {self.source_path}/{folder_id} "
+
         """Perform any activity required for starting measurements."""
-        """We are already in the right directory I believe"""
-        # llm = context.run_variation['llm']
-        # language = context.run_variation['language']
-        # problem = context.run_variation['problem']
-        # folder_id = f"{llm}_{language}_{problem}"
 
         run_command = f"./code"
         energibridge_command = f'{cd_command}&& sudo -S energibridge --output "energibridge.csv" --summary {run_command}'
@@ -179,22 +164,19 @@ class RunnerConfig:
 
     def interact(self, context: RunnerContext) -> None:
         """Perform any interaction with the running target system here, or block here until the target finishes."""
-
-        output.console_log("Config.interact() called!")
+        pass
 
     def stop_measurement(self, context: RunnerContext) -> None:
         """Perform any activity here required for stopping measurements."""
-
-        output.console_log("Config.stop_measurement called!")
+        pass
 
     def stop_run(self, context: RunnerContext) -> None:
         """Perform any activity here required for stopping the run.
         Activities after stopping the run should also be performed here."""
-
-        output.console_log("Config.stop_run() called!")
+        pass
 
     def populate_run_data(self, context: RunnerContext) -> Optional[Dict[str, SupportsStr]]:
-        ssh_client = self.create_new_ssh_client() # open connection once
+        ssh_client = self.create_new_ssh_client()
         llm = context.run_variation['llm']
         language = context.run_variation['language']
         problem = context.run_variation['problem']
@@ -219,7 +201,7 @@ class RunnerConfig:
         # Read the CSV content from the remote server
         csv_content = read_file_from_ssh(ssh_client, remote_csv_path)
 
-        # Read the CSV content into a pandas DataFrame
+        # Put the CSV content into a pandas DataFrame
         df = pd.read_csv(StringIO(csv_content))
     
         num_rows = len(df)
@@ -254,11 +236,8 @@ class RunnerConfig:
     def after_experiment(self) -> None:
         """Perform any activity required after stopping the experiment here
         Invoked only once during the lifetime of the program."""
-        # if self.ssh_client:
-        #     self.ssh_client.close()
-        #     output.console_log("SSH connection closed")
-        output.console_log("Config.after_experiment() called!")
-    
+        pass
+
     """
     Create a new ssh client
     """
@@ -273,5 +252,6 @@ class RunnerConfig:
         if ssh_client:
             ssh_client.close()
             output.console_log("SSH connection closed")
+
     # ================================ DO NOT ALTER BELOW THIS LINE ================================
     experiment_path:            Path             = None
