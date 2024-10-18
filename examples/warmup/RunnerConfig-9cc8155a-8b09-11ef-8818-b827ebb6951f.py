@@ -79,7 +79,23 @@ class RunnerConfig:
         self.run_table_model = RunTableModel(
             factors=[llm_factor, language_factor, problem_type, prompt_factor],
             repetitions = 3,
-            data_columns=['energy_usage', 'cpu_usage', 'memory_usage', 'execution_time', 'machine_code_size']
+            data_columns=['energy_usage_dram',
+                          'energy_usage_package',
+                          'energy_usage_pp0',
+                          'energy_usage_pp1', 
+                          'cpu_usage_0', 
+                          'cpu_usage_1',
+                          'cpu_usage_2', 
+                          'cpu_usage_3',
+                          'cpu_usage_4',
+                          'cpu_usage_5',
+                          'cpu_usage_6',
+                          'cpu_usage_7',
+                          'cpu_usage_8',
+                          'cpu_usage_9',
+                          'cpu_usage_10',
+                          'cpu_usage_11',
+                          'memory_usage', 'execution_time', 'machine_code_size']
         )
         return self.run_table_model
 
@@ -207,11 +223,24 @@ class RunnerConfig:
         num_rows = len(df)
 
         # Calculate energy usage (sum of relevant energy columns divided by number of rows)
-        energy_usage = round((df['DRAM_ENERGY (J)'].sum() + df['PACKAGE_ENERGY (J)'].sum()) / num_rows, 3)
-
-        # Calculate average CPU usage (mean of all CPU_USAGE_* columns)
-        cpu_usage_columns = [col for col in df.columns if col.startswith('CPU_USAGE_')]
-        cpu_usage = round(df[cpu_usage_columns].mean().mean(), 3)
+        energy_usage_dram = round((df['DRAM_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_package = round((df['PACKAGE_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_pp0 = round((df['PP0_ENERGY (J)'].sum() / num_rows, 3)
+        energy_usage_pp1 = round((df['PP1_ENERGY (J)'].sum() / num_rows, 3)
+                                 
+        # Cpu usage                                 
+        cpu_usage_0 = round(df['CPU_USAGE_0'].sum() / num_rows, 3)
+        cpu_usage_1 = round(df['CPU_USAGE_1'].sum() / num_rows, 3)
+        cpu_usage_2 = round(df['CPU_USAGE_2'].sum() / num_rows, 3)
+        cpu_usage_3 = round(df['CPU_USAGE_3'].sum() / num_rows, 3)
+        cpu_usage_4 = round(df['CPU_USAGE_4'].sum() / num_rows, 3)
+        cpu_usage_5 = round(df['CPU_USAGE_5'].sum() / num_rows, 3)
+        cpu_usage_6 = round(df['CPU_USAGE_6'].sum() / num_rows, 3)
+        cpu_usage_7 = round(df['CPU_USAGE_7'].sum() / num_rows, 3)
+        cpu_usage_8 = round(df['CPU_USAGE_8'].sum() / num_rows, 3)
+        cpu_usage_9 = round(df['CPU_USAGE_9'].sum() / num_rows, 3)
+        cpu_usage_10 = round(df['CPU_USAGE_10'].sum() / num_rows, 3)
+        cpu_usage_11 = round(df['CPU_USAGE_11'].sum() / num_rows, 3)
 
         # Calculate average memory usage (average over the rows)
         memory_usage = round(df['USED_MEMORY'].mean(), 3)
@@ -224,8 +253,22 @@ class RunnerConfig:
         # Calculate execution time
         output.console_log("Config.populate_run_data() called!")
         run_data = {
-            'energy_usage': energy_usage,
-            'cpu_usage': cpu_usage,
+            'energy_usage_dram': energy_usage_dram,
+            'energy_usage_package': energy_usage_package,
+            'energy_usage_pp0': energy_usage_pp0,
+            'energy_usage_pp1': energy_usage_pp1, 
+            'cpu_usage_0': cpu_usage_0, 
+            'cpu_usage_1': cpu_usage_1,
+            'cpu_usage_2': cpu_usage_2, 
+            'cpu_usage_3': cpu_usage_3,
+            'cpu_usage_4': cpu_usage_4,
+            'cpu_usage_5': cpu_usage_5,
+            'cpu_usage_6': cpu_usage_6,
+            'cpu_usage_7': cpu_usage_7,
+            'cpu_usage_8': cpu_usage_8,
+            'cpu_usage_9': cpu_usage_9,
+            'cpu_usage_10': cpu_usage_10,
+            'cpu_usage_11': cpu_usage_11,
             'memory_usage': memory_usage,
             'execution_time': execution_time,
             'machine_code_size': machine_code_size
