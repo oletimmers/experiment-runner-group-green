@@ -1,43 +1,69 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
 class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
-        int left = 0;
-        int right = nums.size() - 1;
+        // 1. Create a copy of the input array to avoid side effects
+        vector<int> sortedNums = nums; 
 
-        // If not sorted, you might need to sort it first:
-        // sort(nums.begin(), nums.end());
+        // 2. Sort the copied array
+        sort(sortedNums.begin(), sortedNums.end());
+
+        int left = 0;
+        int right = sortedNums.size() - 1;
 
         while (left < right) {
-            int currentSum = nums[left] + nums[right];
+            int currentSum = sortedNums[left] + sortedNums[right];
 
             if (currentSum == target) {
-                return {left, right};
+                // 3. Find the original indices from the sorted indices
+                int index1 = -1, index2 = -1;
+                for (int i = 0; i < nums.size(); ++i) {
+                    if (nums[i] == sortedNums[left] && index1 == -1) {
+                        index1 = i;
+                    } else if (nums[i] == sortedNums[right]) {
+                        index2 = i;
+                    }
+                }
+                return {index1, index2}; 
             } else if (currentSum < target) {
-                left++; // Need a larger sum, move left pointer
+                left++;
             } else {
-                right--; // Need a smaller sum, move right pointer
+                right--;
             }
         }
 
-        return {}; // No solution found
+        return {}; 
     }
 };
 
 int main() {
+    std::ifstream infile("input.txt");  // Read from input.txt
+    std::string line;
+    
+    // Read the target
+    std::getline(infile, line);
+    int target = std::stoi(line);
+    
+    // Read the vector elements
+    std::vector<int> nums;
+    std::getline(infile, line);
+    std::istringstream iss(line);
+    int num;
+    while (iss >> num) {
+        nums.push_back(num);
+    }
+
+    // Your Two Sum logic
     Solution solution;
-    std::vector<int> nums = {2, 7, 11, 15};
-    int target = 9;
-
-    // Call the twoSum function
     std::vector<int> result = solution.twoSum(nums, target);
-
-    // Print the result
+    
     if (!result.empty()) {
         std::cout << result[0] << ", " << result[1] << std::endl;
     } else {

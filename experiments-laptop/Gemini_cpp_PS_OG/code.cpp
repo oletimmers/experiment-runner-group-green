@@ -1,6 +1,8 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -25,14 +27,26 @@ public:
 };
 
 int main() {
+    std::ifstream infile("input.txt");  // Read from input.txt
+    std::string line;
+    
+    // Read the target
+    std::getline(infile, line);
+    int target = std::stoi(line);
+    
+    // Read the vector elements
+    std::vector<int> nums;
+    std::getline(infile, line);
+    std::istringstream iss(line);
+    int num;
+    while (iss >> num) {
+        nums.push_back(num);
+    }
+
+    // Your Two Sum logic
     Solution solution;
-    std::vector<int> nums = {2, 7, 11, 15};
-    int target = 9;
-
-    // Call the twoSum function
     std::vector<int> result = solution.twoSum(nums, target);
-
-    // Print the result
+    
     if (!result.empty()) {
         std::cout << result[0] << ", " << result[1] << std::endl;
     } else {

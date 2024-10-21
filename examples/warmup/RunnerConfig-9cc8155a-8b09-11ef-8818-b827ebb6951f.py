@@ -164,7 +164,11 @@ class RunnerConfig:
 
         """Perform any activity required for starting measurements."""
 
-        run_command = f"./code"
+        if problem == "PS":
+            run_command = f"./code"
+        else:
+            run_command = f"./code example.txt model network"
+        # run_command = f"./code"
         energibridge_command = f'{cd_command}&& sudo -S energibridge --output "energibridge.csv" --summary {run_command}'
 
         stdin, stdout, stderr = ssh_client.exec_command(energibridge_command)
