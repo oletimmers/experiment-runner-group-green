@@ -15,6 +15,7 @@ from io import StringIO
 import paramiko
 import pandas as pd 
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("paramiko")
@@ -25,7 +26,7 @@ class RunnerConfig:
 
     # ================================ USER SPECIFIC CONFIG ================================
     """The name of the experiment."""
-    name:                       str             = "warmuptests"
+    name:                       str             = "concept"
 
     """The path in which Experiment Runner will create a folder with the name `self.name`, in order to store the
     results from this experiment. (Path does not need to exist - it will be created if necessary.)
@@ -146,8 +147,11 @@ class RunnerConfig:
         instruction_count = int(stdout.read().decode().strip())
         write_command = f"{cd_command}&& echo {instruction_count} > instruction_count.txt"
         stdin, stdout, stderr = ssh_client.exec_command(write_command)
+        sleep_command = f"{cd_command}&& sleep 10"
+        stdin, stdout, stderr = ssh_client.exec_command(sleep_command)
+        time.sleep(10)
         output.console_log("Instruction count written to instruction_count.txt")
-        output.console_log(f"Instruction count: {instruction_count}")
+        output.console_log(f"Instruction count: {instruction_count}\nSleeping 10 seconds now")
 
         output.console_log("Compiled and ready to run!")
         self.close_ssh_client(ssh_client)
