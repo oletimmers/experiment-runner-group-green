@@ -27,7 +27,7 @@ public:
 };
 
 int main() {
-    std::ifstream infile("input_1.txt");  // Read from input.txt
+    std::ifstream infile("input.txt");  // Read from input.txt
     std::string line;
     
     // Read the target
