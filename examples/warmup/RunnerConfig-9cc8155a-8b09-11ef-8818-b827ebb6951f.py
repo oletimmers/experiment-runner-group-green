@@ -26,7 +26,7 @@ class RunnerConfig:
 
     # ================================ USER SPECIFIC CONFIG ================================
     """The name of the experiment."""
-    name:                       str             = "concept"
+    name:                       str             = "final"
 
     """The path in which Experiment Runner will create a folder with the name `self.name`, in order to store the
     results from this experiment. (Path does not need to exist - it will be created if necessary.)
@@ -40,7 +40,7 @@ class RunnerConfig:
     # Change these LOCALLY
     hostname:                   str             = "192.168.178.207"
     username:                   str             = "ubuntu-ole"
-    password:                   str             = "john123pw"
+    password:                   str             = "pw"
 
     """Experiment operation type. Unless you manually want to initiate each run, use `OperationType.AUTO`."""
     operation_type:             OperationType   = OperationType.AUTO
@@ -79,7 +79,7 @@ class RunnerConfig:
         prompt_factor = FactorModel("prompt", ["OG", "EE"])
         self.run_table_model = RunTableModel(
             factors=[llm_factor, language_factor, problem_type, prompt_factor],
-            repetitions = 3,
+            repetitions = 20,
             data_columns=['energy_usage_dram',
                           'energy_usage_package',
                           'energy_usage_pp0',
@@ -151,7 +151,7 @@ class RunnerConfig:
         stdin, stdout, stderr = ssh_client.exec_command(sleep_command)
         time.sleep(10)
         output.console_log("Instruction count written to instruction_count.txt")
-        output.console_log(f"Instruction count: {instruction_count}\nSleeping 10 seconds now")
+        output.console_log(f"Instruction count: {instruction_count}\nSleeping 10 seconds now.")
 
         output.console_log("Compiled and ready to run!")
         self.close_ssh_client(ssh_client)
