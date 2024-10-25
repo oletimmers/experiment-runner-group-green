@@ -58,7 +58,7 @@ Use Data.Text functions such as T.toLower, T.replace, and T.isInfixOf for effici
 
 The correct way to handle IO errors now is to use the catch or try functions from the Control.Exception module
 
-#Haskell-String-Replacement - Energy Efficient 
+# Haskell-String-Replacement - Energy Efficient 
 
 ## ChatGPT-4o,Claude 
 
